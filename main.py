@@ -19,18 +19,20 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
                               & (filtered_df['weight'] >= 100) & (filtered_df['deadlift'] >= 10)]
     return filtered_df.head(1000)
 
-def generate_scatter_plot(df: pd.DataFrame) -> px.scatter:
+def generate_scatter_plot(df: pd.DataFrame, x_axis:str="weight",y_axis:str="deadlift", trendline: str="ols") -> px.scatter:
     fig = px.scatter(
         df,
-        x='weight',
-        y='deadlift',
-        title='Weight vs Deadlift',
-        trendline="ols"
+        x=x_axis,
+        y=y_axis,
+        title=f'{x_axis} vs {y_axis}',
+        trendline=trendline,
+        hover_name='name',
+        hover_data=['region', 'affiliate', 'team', 'gender']
     )
 
     fig.update_layout(
-        xaxis_title="Body Weight (lbs)",
-        yaxis_title='Deadlift (lbs)',
+        xaxis_title=x_axis,
+        yaxis_title=y_axis,
         height=700,
         width=900
     )
@@ -40,11 +42,39 @@ def generate_scatter_plot(df: pd.DataFrame) -> px.scatter:
 def main():
     df = load_data()
     df = clean_data(df=df)
-    st.plotly_chart(generate_scatter_plot(df=df))
+
+    with st.sidebar:
+        st.subheader('Options')
+        numeric_columns = df.select_dtypes(include=['number']).drop(['athlete_id'], axis='columns').columns.tolist()
+        x_axis = st.selectbox(
+            label='X axis',
+            options=numeric_columns,
+            key='x_axis'
+        )
+        
+        y_axis = st.selectbox(
+            label='Y axis',
+            options=[col for col in numeric_columns if col != x_axis],
+            key='y_axis'
+        )
+        trendline_options={
+            'Ordinary Least Squares': 'ols',
+            'Expanding': 'expanding',
+            'Locally Weighted Scatterplot Smoothing': 'lowess'
+        }
+
+        trendline_display = st.selectbox(
+            label='Trendline',
+            options=trendline_options.keys(),
+            key='trendline'
+        )
+        trendline = trendline_options[trendline_display]
+
+    st.plotly_chart(generate_scatter_plot(df=df, x_axis=x_axis, y_axis=y_axis, trendline=trendline))
     if st.checkbox("Show Statistics"):
         st.subheader("Averages")
-        st.markdown(f"**Deadlift**: {df['deadlift'].mean():.2f} lbs")
-        st.markdown(f"**Weight**: {df['weight'].mean():.2f} lbs")
+        st.markdown(f"**{x_axis}**: {df[x_axis].mean():.2f}")
+        st.markdown(f"**{y_axis}**: {df[y_axis].mean():.2f}")
     with st.expander('Raw Data'):
         st.dataframe(df)
 
