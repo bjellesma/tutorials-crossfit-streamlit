@@ -8,6 +8,8 @@ streamlit = "*"
 pandas = "*"
 plotly = "*"
 statsmodels = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 
@@ -16,3 +18,5 @@ python_version = "3.10"
 
 [scripts]
 dev = "streamlit run main.py"
+test = "pytest -m single -v --cov=."
+fulltest = "pytest -v --cov=."
