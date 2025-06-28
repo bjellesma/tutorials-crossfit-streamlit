@@ -2,6 +2,7 @@
 
 def main():
     import streamlit as st
+    from st_aggrid import AgGrid, GridOptionsBuilder
     from src.plot import load_data, clean_data, generate_scatter_plot, generate_histogram
     from utils import helpers
     st.set_page_config(page_title="Crossfit Data")
@@ -71,13 +72,28 @@ def main():
     
     scatter_tab, stabs_tab = st.tabs(['Scatter', 'Stats'])
     with scatter_tab:
+        
         st.plotly_chart(generate_scatter_plot(df=df, x_axis=x_axis, y_axis=y_axis, trendline=trendline))
         if st.checkbox("Show Statistics"):
             st.subheader("Averages")
             st.markdown(f"**{x_axis_display}**: {df[x_axis].mean():.2f}")
             st.markdown(f"**{y_axis_display}**: {df[y_axis].mean():.2f}")
-        with st.expander('Raw Data'):
-            st.dataframe(df)
+        if st.toggle('Raw Data'):
+            gender_options = df['gender'].unique().tolist()
+            selected_genders = st.multiselect("Gender", options=gender_options)
+            df = df[df['gender'].isin(selected_genders)] if selected_genders else df
+            gb = GridOptionsBuilder.from_dataframe(df)
+            for col in df.select_dtypes(include=["object"]).columns:
+                gb.configure_column(col,
+                        type=["textColumn", "textColumnFilter"],
+                        filter="agTextColumnFilter")
+            grid_options = gb.build()
+            
+            # pagination
+            grid_options['pagination'] = True
+            grid_options['paginationAutoPageSize'] = False
+            grid_options['paginationPageSizeSelector'] = [5, 10, 20, 50, 100]
+            AgGrid(df, gridOptions=grid_options, key="raw_data")
     with stabs_tab:
         x_histogram=generate_histogram(df, x_axis, x_mean, x_std)
         st.plotly_chart(x_histogram, use_container_width=True, theme=None)

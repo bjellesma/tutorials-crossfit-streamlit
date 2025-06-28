@@ -10,6 +10,7 @@ plotly = "*"
 statsmodels = "*"
 pytest = "*"
 pytest-cov = "*"
+streamlit-aggrid = "*"
 
 [dev-packages]
 
