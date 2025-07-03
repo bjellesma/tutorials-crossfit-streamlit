@@ -1,14 +1,64 @@
 
 
 def main():
+    import pandas as pd
     import streamlit as st
     from st_aggrid import AgGrid, GridOptionsBuilder
     from src.plot import load_data, clean_data, generate_scatter_plot, generate_histogram
     from utils import helpers
+    import io 
+    import zipfile
+    from datetime import datetime
     st.set_page_config(page_title="Crossfit Data")
     df = load_data()
     
-    
+    @st.fragment
+    def download_data(df: pd.DataFrame, x_axis, y_axis, fig):
+        # filtering columns
+        cols_to_include = ['name', 'affiliate', 'region', 'team', 'gender', x_axis, y_axis]
+        filtered_df = df[cols_to_include].copy()
+
+        #captilize
+        filtered_df.columns = [col.capitalize() for col in filtered_df.columns]
+
+        # convert to int
+        for col in filtered_df.columns:
+            if filtered_df[col].dtype == 'float64':
+                filtered_df[col] = filtered_df[col].astype(int)
+
+        zip_buffer = io.BytesIO()
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        # image
+        img_buffer = io.BytesIO()
+        fig.write_image(img_buffer, format='png', width=1000, height=800)
+
+
+        with zipfile.ZipFile(zip_buffer,'w',zipfile.ZIP_DEFLATED) as zip_file:
+            csv = filtered_df.to_csv(index=False)
+            zip_file.writestr('crossfit_data.csv', csv)
+
+            metadata = f"""
+Generated at: {timestamp}
+X Axis: {x_axis}
+Y Axis: {y_axis}
+Trendline: {trendline_options.get(trendline)}
+Records: {len(filtered_df)}
+Columns: {', '.join(filtered_df.columns
+)}
+"""
+
+            zip_file.writestr('metadata.txt', metadata)
+            zip_file.writestr('scatter.png', img_buffer.getvalue())
+
+        
+        st.download_button(
+            label="Download Data",
+            data=zip_buffer.getvalue(),
+            file_name=f"crossfit_data_{timestamp}.zip",
+            mime='application/zip'
+        )
 
     with st.sidebar:
         st.subheader('Options')
@@ -72,8 +122,10 @@ def main():
     
     scatter_tab, stabs_tab = st.tabs(['Scatter', 'Stats'])
     with scatter_tab:
+        fig = generate_scatter_plot(df=df, x_axis=x_axis, y_axis=y_axis, trendline=trendline)
+        download_data(df=df, x_axis=x_axis, y_axis=y_axis, fig=fig)
         
-        st.plotly_chart(generate_scatter_plot(df=df, x_axis=x_axis, y_axis=y_axis, trendline=trendline))
+        st.plotly_chart(fig)
         if st.checkbox("Show Statistics"):
             st.subheader("Averages")
             st.markdown(f"**{x_axis_display}**: {df[x_axis].mean():.2f}")

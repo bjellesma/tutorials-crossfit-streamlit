@@ -11,6 +11,7 @@ statsmodels = "*"
 pytest = "*"
 pytest-cov = "*"
 streamlit-aggrid = "*"
+kaleido = "*"
 
 [dev-packages]
 
