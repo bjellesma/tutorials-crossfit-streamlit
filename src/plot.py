@@ -44,8 +44,8 @@ def clean_data(df: pd.DataFrame, sample_size: int, x_axis: str, y_axis: str, x_t
     return filtered_df, (x_mean, x_std), (y_mean, y_std), (x_lower, x_upper), (y_lower, y_upper)
 
 def generate_scatter_plot(df: pd.DataFrame, x_axis:str="weight",y_axis:str="deadlift", trendline: str="ols") -> px.scatter:
-    x_axis_display = helpers.display_axis_label(x_axis)
-    y_axis_display = helpers.display_axis_label(y_axis)
+    x_axis_display = helpers.get_event_info(x_axis)
+    y_axis_display = helpers.get_event_info(y_axis)
     fig = px.scatter(
         df,
         x=x_axis,
@@ -57,8 +57,8 @@ def generate_scatter_plot(df: pd.DataFrame, x_axis:str="weight",y_axis:str="dead
     )
 
     fig.update_layout(
-        xaxis_title=x_axis_display,
-        yaxis_title=y_axis_display,
+        xaxis_title=f'{x_axis_display} ({helpers.get_event_info(x_axis, "unit")})',
+        yaxis_title=f'{y_axis_display} ({helpers.get_event_info(y_axis, "unit")})',
         height=700,
         width=900
     )
@@ -71,7 +71,7 @@ def generate_histogram(df: pd.DataFrame, column: str, mean, std, num_std = 5):
         x=column,
         nbins=50,
         opacity=.7,
-        title=f'Distribution of {helpers.display_axis_label(column)}'
+        title=f'Distribution of {helpers.get_event_info(column)}'
     )
 
     fig.add_vline(
@@ -99,7 +99,7 @@ def generate_histogram(df: pd.DataFrame, column: str, mean, std, num_std = 5):
         )
 
     fig.update_layout(
-        xaxis_title=helpers.display_axis_label(column),
+        xaxis_title=helpers.get_event_info(column),
         yaxis_title="Distribution",
         height=700,
         width=900

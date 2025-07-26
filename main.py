@@ -66,19 +66,19 @@ Columns: {', '.join(filtered_df.columns
         x_axis = st.selectbox(
             label='X axis',
             options=numeric_columns,
-            format_func=helpers.display_axis_label,
+            format_func=helpers.get_event_info,
             key='x_axis'
         )
-        x_axis_display = helpers.display_axis_label(x_axis)
+        x_axis_display = helpers.get_event_info(x_axis)
         y_axis = st.selectbox(
             label='Y axis',
             options=[col for col in numeric_columns if col != x_axis],
-            format_func=helpers.display_axis_label,
+            format_func=helpers.get_event_info,
             key='y_axis'
         )
-        y_axis_display = helpers.display_axis_label(y_axis)
+        y_axis_display = helpers.get_event_info(y_axis)
         with st.sidebar.container():
-            st.subheader(x_axis_display)
+            st.subheader(f'{x_axis_display} ({helpers.get_event_info(x_axis, "unit")})')
             x_threshold_lower = st.number_input(f'Select lower bound for {x_axis_display}',value=0, min_value=0)
             x_threshold_upper = st.number_input(f'Select upper bound for {x_axis_display}',value=1000, min_value=0)
             x_std_slider = st.slider(
@@ -90,7 +90,7 @@ Columns: {', '.join(filtered_df.columns
                 key="x_slider"
             ) if st.checkbox("Remove Outliers", key="x_outliers") else 0
         with st.sidebar.container():
-            st.subheader(y_axis_display)
+            st.subheader(f'{y_axis_display} ({helpers.get_event_info(y_axis, "unit")})')
             y_threshold_lower = st.number_input(f'Select lower bound for {y_axis_display}',value=0, min_value=0)
             y_threshold_upper = st.number_input(f'Select lower bound for {y_axis_display}',value=1000, min_value=0)
             y_std_slider = st.slider(
@@ -128,8 +128,21 @@ Columns: {', '.join(filtered_df.columns
         st.plotly_chart(fig)
         if st.checkbox("Show Statistics"):
             st.subheader("Averages")
-            st.markdown(f"**{x_axis_display}**: {df[x_axis].mean():.2f}")
-            st.markdown(f"**{y_axis_display}**: {df[y_axis].mean():.2f}")
+            st.markdown(f"**{x_axis_display}**: {helpers.format_value(value=df[x_axis].mean(), axis_name=x_axis)}")
+            st.markdown(f"**{y_axis_display}**: {helpers.format_value(value=df[y_axis].mean(), axis_name=y_axis)}")
+
+        st.subheader("Events")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(f"**{x_axis_display}**")
+            st.markdown(f'**Description:** {helpers.get_event_info(x_axis, "description")}')
+
+        with col2:
+            st.markdown(f"**{y_axis_display}**")
+            st.markdown(f'**Description:** {helpers.get_event_info(y_axis, "description")}')
+
         if st.toggle('Raw Data'):
             gender_options = df['gender'].unique().tolist()
             selected_genders = st.multiselect("Gender", options=gender_options)
