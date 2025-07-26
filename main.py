@@ -131,6 +131,120 @@ Columns: {', '.join(filtered_df.columns
             st.markdown(f"**{x_axis_display}**: {helpers.format_value(value=df[x_axis].mean(), axis_name=x_axis)}")
             st.markdown(f"**{y_axis_display}**: {helpers.format_value(value=df[y_axis].mean(), axis_name=y_axis)}")
 
+        if helpers.get_event_info(x_axis, 'better') == 'lower':
+            top_athletes = df.nsmallest(5, x_axis)[['name', x_axis, y_axis]].to_dict('records')
+        else:
+            top_athletes = df.nlargest(5, x_axis)[['name', x_axis, y_axis]].to_dict('records')
+
+        athlete_html = f"""
+        <style>
+            .athletes-section {{
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                border-radius: 15px;
+                color: white;
+                margin-bottom: 20px;
+            }}
+            
+            .athlete-card {{
+                background: rgba(255,255,255,0.1);
+                margin: 10px 0;
+                padding: 15px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color:white;
+            }}
+            .athlete-card.clicked {{
+                background: rgba(255,215,0,0.3);
+                border: 2px solid #ffd93d;
+            }}
+            .athlete-card:hover {{
+                transform: scale(1.02);
+                background: rgba(255,255,255,0.2);
+            }}
+            .athlete-name {{
+                color: #ffd93d;
+            }}
+            
+            .stat-label {{
+                color: #6bcf7f;
+            }}
+            .stats-summary {{
+                background: rgba(255,255,255,0.1);
+                padding: 15px;
+                border-radius: 8px;
+                margin-top: 15px;
+                border: 2px solid transparent;
+            }}
+            
+            .stats-title {{
+                color: #ffd93d;
+                font-size: 16px;
+            }}
+            
+            .stats-value {{
+                color: #6bcf7f;
+                font-weight: bold;
+                font-size: 18px;
+            }}
+        </style>
+        <div>
+            <div class='athletes-section'>
+                <h3>Top 5 athletes by {x_axis_display}
+            </div>
+            <div>
+            {''.join([f'''
+                <div class='athlete-card' onclick="toggleCard(this)" data-{x_axis}="{athlete[x_axis]}" data-{y_axis}="{athlete[y_axis]}">
+                    <h4 class='athlete-name'>{athlete['name']}</h4>
+                    <p>
+                        <span class='stat-label'>{x_axis_display}:</span>{helpers.format_value(athlete[x_axis], x_axis)}<br>
+                        <span class='stat-label'>{y_axis_display}:</span>{helpers.format_value(athlete[y_axis], y_axis)}
+                    </p>
+                </div>
+
+                
+                ''' for athlete in top_athletes])}
+                <div class="stats-summary" id="statsSummary">
+                    <h4 class="stats-title">Selected total</h4>
+                    <p>
+                        <span class='stat-label'>{x_axis_display} Total:</span><span class="stats-value" id="xAxisTotal">0</span><br>
+                        <span class='stat-label'>{y_axis_display} Total:</span><span class="stats-value" id="yAxisTotal">0</span><br>
+                        <span class='stat-label'>Total Athletes:</span><span class="stats-value" id="athleteCount">0</span>
+                    </p>
+                </div>
+                
+                <script>
+                    function toggleCard(card){{
+                        card.classList.toggle('clicked');
+                        updateStats()
+                    }}
+
+                    function updateStats(){{
+                        const selectedCards = document.querySelectorAll('.athlete-card.clicked');
+                        const statsSummary = document.getElementById('statsSummary');
+
+                        let xAxisTotal = 0;
+                        let yAxisTotal = 0;
+
+                        selectedCards.forEach(card => {{
+                            xAxisTotal += parseFloat(card.dataset['{x_axis}'])
+                            yAxisTotal += parseFloat(card.dataset['{y_axis}'])
+                        }});
+
+                        document.getElementById('xAxisTotal').textContent = xAxisTotal;
+                        document.getElementById('yAxisTotal').textContent = yAxisTotal;
+                        document.getElementById('athleteCount').textContent = selectedCards.length;
+                    }}
+                </script>
+
+                
+            </div>
+        </div>
+"""
+        
+        st.components.v1.html(athlete_html, height=1200)
+
         st.subheader("Events")
 
         col1, col2 = st.columns(2)
