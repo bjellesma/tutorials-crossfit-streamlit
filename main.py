@@ -16,6 +16,8 @@ def main():
                 """, unsafe_allow_html=True)
     with open('style.css') as f:
         css_content = f.read()
+    with open('script.js') as f:
+        js_content = f.read()
     css_vars = helpers.generate_css()
     st.markdown(f'<style>{css_vars}{css_content}</style>', unsafe_allow_html=True)
     st.set_page_config(page_title="Crossfit Data")
@@ -150,6 +152,11 @@ Columns: {', '.join(filtered_df.columns
         {css_vars}
         {css_content}
         </style>
+        <script>
+        const x_axis = '{x_axis}';
+        const y_axis = '{y_axis}';
+        {js_content}
+        </script>
         <div>
             <div class='athletes-section'>
                 <h3>Top 5 athletes by {x_axis_display}
@@ -174,30 +181,6 @@ Columns: {', '.join(filtered_df.columns
                         <span class='stat-label'>Total Athletes:</span><span class="stats-value" id="athleteCount">0</span>
                     </p>
                 </div>
-                
-                <script>
-                    function toggleCard(card){{
-                        card.classList.toggle('clicked');
-                        updateStats()
-                    }}
-
-                    function updateStats(){{
-                        const selectedCards = document.querySelectorAll('.athlete-card.clicked');
-                        const statsSummary = document.getElementById('statsSummary');
-
-                        let xAxisTotal = 0;
-                        let yAxisTotal = 0;
-
-                        selectedCards.forEach(card => {{
-                            xAxisTotal += parseFloat(card.dataset['{x_axis}'])
-                            yAxisTotal += parseFloat(card.dataset['{y_axis}'])
-                        }});
-
-                        document.getElementById('xAxisTotal').textContent = xAxisTotal;
-                        document.getElementById('yAxisTotal').textContent = yAxisTotal;
-                        document.getElementById('athleteCount').textContent = selectedCards.length;
-                    }}
-                </script>
 
                 
             </div>
