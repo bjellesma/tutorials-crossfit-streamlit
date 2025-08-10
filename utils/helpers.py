@@ -23,4 +23,11 @@ def format_value(value:float,axis_name:str):
         return f'{value:.2f}\"'
     else:
         return f'{value:.2f} {unit}'
+    
+def generate_css():
+    return f"""
+    :root {{
+        --font-family: {constants.FONT_FAMILY}
+    }}
+    """
 

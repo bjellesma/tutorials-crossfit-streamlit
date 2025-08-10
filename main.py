@@ -9,6 +9,15 @@ def main():
     import io 
     import zipfile
     from datetime import datetime
+    st.markdown(f"""
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libertinus+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+                """, unsafe_allow_html=True)
+    with open('style.css') as f:
+        css_content = f.read()
+    css_vars = helpers.generate_css()
+    st.markdown(f'<style>{css_vars}{css_content}</style>', unsafe_allow_html=True)
     st.set_page_config(page_title="Crossfit Data")
     df = load_data()
     
@@ -138,56 +147,8 @@ Columns: {', '.join(filtered_df.columns
 
         athlete_html = f"""
         <style>
-            .athletes-section {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 20px;
-                border-radius: 15px;
-                color: white;
-                margin-bottom: 20px;
-            }}
-            
-            .athlete-card {{
-                background: rgba(255,255,255,0.1);
-                margin: 10px 0;
-                padding: 15px;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                color:white;
-            }}
-            .athlete-card.clicked {{
-                background: rgba(255,215,0,0.3);
-                border: 2px solid #ffd93d;
-            }}
-            .athlete-card:hover {{
-                transform: scale(1.02);
-                background: rgba(255,255,255,0.2);
-            }}
-            .athlete-name {{
-                color: #ffd93d;
-            }}
-            
-            .stat-label {{
-                color: #6bcf7f;
-            }}
-            .stats-summary {{
-                background: rgba(255,255,255,0.1);
-                padding: 15px;
-                border-radius: 8px;
-                margin-top: 15px;
-                border: 2px solid transparent;
-            }}
-            
-            .stats-title {{
-                color: #ffd93d;
-                font-size: 16px;
-            }}
-            
-            .stats-value {{
-                color: #6bcf7f;
-                font-weight: bold;
-                font-size: 18px;
-            }}
+        {css_vars}
+        {css_content}
         </style>
         <div>
             <div class='athletes-section'>
@@ -250,12 +211,26 @@ Columns: {', '.join(filtered_df.columns
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown(f"**{x_axis_display}**")
-            st.markdown(f'**Description:** {helpers.get_event_info(x_axis, "description")}')
+            st.markdown(f"""
+                        <div class='event-card'>
+                            <div class='event-title'>{x_axis_display}</div>
+                            <div class='event-description'>{helpers.get_event_info(x_axis, "description")}</div>
+                            <div class='event-meta'>
+                                <div class='event-unit'>{helpers.get_event_info(x_axis, "unit")}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
         with col2:
-            st.markdown(f"**{y_axis_display}**")
-            st.markdown(f'**Description:** {helpers.get_event_info(y_axis, "description")}')
+            st.markdown(f"""
+                        <div class='event-card'>
+                            <div class='event-title'>{y_axis_display}</div>
+                            <div class='event-description'>{helpers.get_event_info(y_axis, "description")}</div>
+                            <div class='event-meta'>
+                                <div class='event-unit'>{helpers.get_event_info(y_axis, "unit")}</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
         if st.toggle('Raw Data'):
             gender_options = df['gender'].unique().tolist()

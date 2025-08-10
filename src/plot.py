@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils import helpers
+from utils import helpers, constants
 
 def calculate_stats(df, column):
     mean = df[column].mean()
@@ -60,7 +60,13 @@ def generate_scatter_plot(df: pd.DataFrame, x_axis:str="weight",y_axis:str="dead
         xaxis_title=f'{x_axis_display} ({helpers.get_event_info(x_axis, "unit")})',
         yaxis_title=f'{y_axis_display} ({helpers.get_event_info(y_axis, "unit")})',
         height=700,
-        width=900
+        width=900,
+        font=dict(
+            family=constants.FONT_FAMILY
+        ),
+        title_font=dict(
+            family=constants.FONT_FAMILY
+        )
     )
 
     return fig
@@ -102,7 +108,13 @@ def generate_histogram(df: pd.DataFrame, column: str, mean, std, num_std = 5):
         xaxis_title=helpers.get_event_info(column),
         yaxis_title="Distribution",
         height=700,
-        width=900
+        width=900,
+        font=dict(
+            family=constants.FONT_FAMILY
+        ),
+        title_font=dict(
+            family=constants.FONT_FAMILY
+        )
     )
 
     return fig

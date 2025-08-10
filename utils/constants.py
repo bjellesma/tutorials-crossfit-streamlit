@@ -1,3 +1,5 @@
+FONT_FAMILY = "Libertinus Sans, sans-serif"
+
 EVENT_MAPPING = {
     'athlete_id': {
         'display_name': 'Athlete ID',
