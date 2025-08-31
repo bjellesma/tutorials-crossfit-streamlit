@@ -1,4 +1,5 @@
 from utils import constants
+import streamlit as st
 
 def _get_event(axis_name: str):
     return constants.EVENT_MAPPING.get(axis_name, {
@@ -30,4 +31,10 @@ def generate_css():
         --font-family: {constants.FONT_FAMILY}
     }}
     """
+
+def get_url_param(key, default=None):
+    return st.query_params.get(key, default)
+
+def set_url_param(key, value):
+    st.query_params[key] = value
 

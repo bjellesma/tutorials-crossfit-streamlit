@@ -73,21 +73,37 @@ Columns: {', '.join(filtered_df.columns
 
     with st.sidebar:
         st.subheader('Options')
+
+        
+
         numeric_columns = df.select_dtypes(include=['number']).drop(['athlete_id'], axis='columns').columns.tolist()
+        print(numeric_columns)
+
+        x_selection = helpers.get_url_param(key='x_axis', default=numeric_columns[0])
+        y_selection = helpers.get_url_param(key='y_axis', default=numeric_columns[1])
+
         x_axis = st.selectbox(
             label='X axis',
             options=numeric_columns,
             format_func=helpers.get_event_info,
-            key='x_axis'
+            key='x_axis',
+            index=numeric_columns.index(x_selection)
         )
         x_axis_display = helpers.get_event_info(x_axis)
+
+        helpers.set_url_param('x_axis', x_axis)
+
+        # we dont want x axis and y axis to be the same 
+        y_values = [col for col in numeric_columns if col != x_axis]
         y_axis = st.selectbox(
             label='Y axis',
-            options=[col for col in numeric_columns if col != x_axis],
+            options=y_values,
             format_func=helpers.get_event_info,
-            key='y_axis'
+            key='y_axis',
+            index=y_values.index(y_selection)
         )
         y_axis_display = helpers.get_event_info(y_axis)
+        helpers.set_url_param('y_axis', y_axis)
         with st.sidebar.container():
             st.subheader(f'{x_axis_display} ({helpers.get_event_info(x_axis, "unit")})')
             x_threshold_lower = st.number_input(f'Select lower bound for {x_axis_display}',value=0, min_value=0)
