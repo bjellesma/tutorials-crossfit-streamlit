@@ -35,6 +35,3 @@ def generate_css():
 def get_url_param(key, default=None):
     return st.query_params.get(key, default)
 
-def set_url_param(key, value):
-    st.query_params[key] = value
-
