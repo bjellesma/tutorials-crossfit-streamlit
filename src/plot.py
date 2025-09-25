@@ -2,15 +2,25 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from utils import helpers, constants
+import duckdb
+import os
 
 def calculate_stats(df, column):
     mean = df[column].mean()
     std = df[column].std()
     return mean, std
 
-@st.cache_data
+@st.cache_resource
 def load_data() -> pd.DataFrame:
-    return pd.read_csv('temp/athletes.csv')
+    db_path = "athletes.duckdb"
+
+    if os.path.exists(db_path):
+        conn = duckdb.connect(db_path)
+        df = conn.execute("Select * from athletes").df()
+        conn.close()
+        return df
+    else:
+        print(f'Unable to load file from {db_path}')
 
 @st.cache_data
 def clean_data(df: pd.DataFrame, sample_size: int, x_axis: str, y_axis: str, x_thresholds: tuple[int, int], y_thresholds: tuple[int, int], standard_deviations: tuple[int, int]) -> pd.DataFrame:
