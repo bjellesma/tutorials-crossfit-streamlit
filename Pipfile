@@ -13,6 +13,7 @@ pytest-cov = "*"
 streamlit-aggrid = "*"
 kaleido = "*"
 duckdb = "*"
+adr-tools-python = "*"
 
 [dev-packages]
 
