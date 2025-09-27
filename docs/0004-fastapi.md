@@ -4,7 +4,7 @@ Date: 2025-09-27
 
 ## Status
 
-fueled [3. Duckdb](0003-duckdb.md)
+fueled by [3. Duckdb](0003-duckdb.md)
 
 Accepted
 

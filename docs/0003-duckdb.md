@@ -6,8 +6,6 @@ Date: 2025-09-27
 
 influences [4. Fastapi](0004-fastapi.md)
 
-Superceded by [4. Sqlite](0004-sqlite.md)
-
 ## Context
 
 
