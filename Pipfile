@@ -14,6 +14,7 @@ streamlit-aggrid = "*"
 kaleido = "*"
 duckdb = "*"
 adr-tools-python = "*"
+fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 
@@ -21,6 +22,7 @@ adr-tools-python = "*"
 python_version = "3.10"
 
 [scripts]
-dev = "streamlit run main.py"
+frontend = "bash -c 'cd frontend && streamlit run main.py'"
+backend = "bash -c 'cd backend && uvicorn routes:app --reload --port 5000'"
 test = "pytest -m single -v --cov=."
 fulltest = "pytest -v --cov=."

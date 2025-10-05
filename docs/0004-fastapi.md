@@ -10,12 +10,4 @@ Accepted
 
 ## Context
 
-The issue motivating this decision, and any context that influences or constrains the decision.
-
-## Decision
-
-The change that we're proposing or have agreed to implement.
-
-## Consequences
-
-What becomes easier or more difficult to do and any risks introduced by the change that will need to be mitigated.
+We want to use a fastapi backend to serve the content to our frontend streamlit application as this will be more scalable as our application grows.
