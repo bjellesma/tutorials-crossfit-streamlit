@@ -1,0 +1,6 @@
+streamlit
+pandas
+plotly
+statsmodels
+streamlit-aggrid
+kaleido

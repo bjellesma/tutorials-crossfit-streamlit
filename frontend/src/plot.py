@@ -10,7 +10,7 @@ def calculate_stats(df, column):
     return mean, std
 
 def load_data() -> pd.DataFrame:
-    res = requests.get('http://localhost:5000/api/athletes')
+    res = requests.get('http://backend:5000/api/athletes')
     data = res.json()
     df = pd.DataFrame(data=data['athletes'], columns=data['columns'])
     return df
