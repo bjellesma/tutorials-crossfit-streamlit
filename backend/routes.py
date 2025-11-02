@@ -4,6 +4,7 @@ import database
 
 app = FastAPI()
 
+
 @app.get("/api/athletes")
 def get_athletes():
     try:

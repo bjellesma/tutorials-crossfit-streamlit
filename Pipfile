@@ -17,6 +17,7 @@ adr-tools-python = "*"
 fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
+ruff = "*"
 
 [requires]
 python_version = "3.10"
