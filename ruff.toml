@@ -1,0 +1,10 @@
+line-length = 100
+
+[format]
+quote-style = "single"
+docstring-code-format = true
+skip-magic-trailing-comma=true
+docstring-code-line-length = 20
+
+[lint]
+select = ["D"]

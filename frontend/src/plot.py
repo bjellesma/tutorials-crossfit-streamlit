@@ -12,9 +12,9 @@ def calculate_stats(df, column):
 
 
 def load_data() -> pd.DataFrame:
-    res = requests.get("http://backend:5000/api/athletes")
+    res = requests.get('http://backend:5000/api/athletes')
     data = res.json()
-    df = pd.DataFrame(data=data["athletes"], columns=data["columns"])
+    df = pd.DataFrame(data=data['athletes'], columns=data['columns'])
     return df
 
 
@@ -28,9 +28,14 @@ def clean_data(
     y_thresholds: tuple[int, int],
     standard_deviations: tuple[int, int],
 ) -> pd.DataFrame:
-    """
-    args:
-        df (pd.Dataframe) data to be looking
+    """args:
+    df (pd.Dataframe) data to be looking
+    sample_size (int) number of samples to be taken
+    x_axis (str) x axis column name
+    y_axis (str) y axis column name
+    x_thresholds (tuple) x axis thresholds
+    y_thresholds (tuple) y axis thresholds
+    standard_deviations (tuple) standard deviations
     """
     filtered_df = df.dropna(subset=[x_axis, y_axis])
     filtered_df = filtered_df[
@@ -63,20 +68,11 @@ def clean_data(
     else:
         y_lower, y_upper = y_thresholds[0], y_thresholds[1]
 
-    return (
-        filtered_df,
-        (x_mean, x_std),
-        (y_mean, y_std),
-        (x_lower, x_upper),
-        (y_lower, y_upper),
-    )
+    return (filtered_df, (x_mean, x_std), (y_mean, y_std), (x_lower, x_upper), (y_lower, y_upper))
 
 
 def generate_scatter_plot(
-    df: pd.DataFrame,
-    x_axis: str = "weight",
-    y_axis: str = "deadlift",
-    trendline: str = "ols",
+    df: pd.DataFrame, x_axis: str = 'weight', y_axis: str = 'deadlift', trendline: str = 'ols'
 ) -> px.scatter:
     x_axis_display = helpers.get_event_info(x_axis)
     y_axis_display = helpers.get_event_info(y_axis)
@@ -84,15 +80,15 @@ def generate_scatter_plot(
         df,
         x=x_axis,
         y=y_axis,
-        title=f"{x_axis_display} vs {y_axis_display}",
+        title=f'{x_axis_display} vs {y_axis_display}',
         trendline=trendline,
-        hover_name="name",
-        hover_data=["region", "affiliate", "team", "gender"],
+        hover_name='name',
+        hover_data=['region', 'affiliate', 'team', 'gender'],
     )
 
     fig.update_layout(
-        xaxis_title=f"{x_axis_display} ({helpers.get_event_info(x_axis, 'unit')})",
-        yaxis_title=f"{y_axis_display} ({helpers.get_event_info(y_axis, 'unit')})",
+        xaxis_title=f'{x_axis_display} ({helpers.get_event_info(x_axis, "unit")})',
+        yaxis_title=f'{y_axis_display} ({helpers.get_event_info(y_axis, "unit")})',
         height=700,
         width=900,
         font=dict(family=constants.FONT_FAMILY),
@@ -108,36 +104,36 @@ def generate_histogram(df: pd.DataFrame, column: str, mean, std, num_std=5):
         x=column,
         nbins=50,
         opacity=0.7,
-        title=f"Distribution of {helpers.get_event_info(column)}",
+        title=f'Distribution of {helpers.get_event_info(column)}',
     )
 
     fig.add_vline(
         x=mean,
-        line_dash="solid",
-        line_color="green",
-        annotation_text="Mean",
-        annotation_position="top right",
+        line_dash='solid',
+        line_color='green',
+        annotation_text='Mean',
+        annotation_position='top right',
     )
 
     for i in range(1, num_std + 1):
         fig.add_vline(
             x=mean + std * i,
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"+{i}σ",
-            annotation_position="top right",
+            line_dash='dash',
+            line_color='red',
+            annotation_text=f'+{i}σ',
+            annotation_position='top right',
         )
         fig.add_vline(
             x=mean - std * i,
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"-{i}σ",
-            annotation_position="top right",
+            line_dash='dash',
+            line_color='red',
+            annotation_text=f'-{i}σ',
+            annotation_position='top right',
         )
 
     fig.update_layout(
         xaxis_title=helpers.get_event_info(column),
-        yaxis_title="Distribution",
+        yaxis_title='Distribution',
         height=700,
         width=900,
         font=dict(family=constants.FONT_FAMILY),

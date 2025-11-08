@@ -5,7 +5,7 @@ import database
 app = FastAPI()
 
 
-@app.get("/api/athletes")
+@app.get('/api/athletes')
 def get_athletes():
     try:
         return database.get_athletes()
