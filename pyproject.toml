@@ -1,0 +1,39 @@
+[project]
+name = "Crossfit-Streamlit"
+version = "0.0.1"
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit",
+    "pandas",
+    "plotly",
+    "statsmodels",
+    "pytest",
+    "pytest-cov",
+    "streamlit-aggrid",
+    "kaleido",
+    "duckdb",
+    "adr-tools-python",
+    "fastapi[standard]",
+]
+
+[dependency-groups]
+dev = ["ruff"]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
+docstring-code-format = true
+skip-magic-trailing-comma = true
+docstring-code-line-length = 20
+
+[tool.ruff.lint]
+select = ["D"]

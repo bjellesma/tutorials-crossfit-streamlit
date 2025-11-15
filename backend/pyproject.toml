@@ -1,0 +1,11 @@
+[project]
+name = ""
+version = "0.0.1"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[standard]",
+    "duckdb",
+]
+
+[tool.uv]
+package = false
