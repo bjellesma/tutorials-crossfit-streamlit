@@ -1,3 +1,9 @@
+"""Test suite for the Streamlit application.
+
+This module contains tests for the main Streamlit app functionality,
+including testing different axis selections and trendline options.
+"""
+
 import pytest
 from streamlit.testing.v1 import AppTest
 
@@ -28,17 +34,36 @@ trendline_functions = [
 
 @pytest.fixture(scope='module')
 def app_test():
+    """Create and run the Streamlit app test instance.
+
+    Returns:
+        AppTest: An initialized and run AppTest instance for testing.
+
+    """
     from main import main
 
     return AppTest.from_function(main, default_timeout=30).run()
 
 
 def test_app(app_test):
+    """Test that the app runs without exceptions.
+
+    Args:
+        app_test (AppTest): The Streamlit app test fixture.
+
+    """
     assert not app_test.exception
 
 
 @pytest.mark.parametrize('value', metrics)
 def test_x_axis(value, app_test):
+    """Test x-axis selection with different metrics.
+
+    Args:
+        value (str): The metric value to test for x-axis selection.
+        app_test (AppTest): The Streamlit app test fixture.
+
+    """
     selectbox = app_test.selectbox(key='x_axis')
     selectbox.set_value(value).run()
 
@@ -48,6 +73,13 @@ def test_x_axis(value, app_test):
 
 @pytest.mark.parametrize('value', metrics[:-1])
 def test_y_axis(value, app_test):
+    """Test y-axis selection with different metrics.
+
+    Args:
+        value (str): The metric value to test for y-axis selection.
+        app_test (AppTest): The Streamlit app test fixture.
+
+    """
     selectbox = app_test.selectbox(key='y_axis')
     selectbox.set_value(value).run()
 
@@ -58,6 +90,13 @@ def test_y_axis(value, app_test):
 @pytest.mark.single
 @pytest.mark.parametrize('value', trendline_functions)
 def test_trendline(value, app_test):
+    """Test trendline selection with different functions.
+
+    Args:
+        value (str): The trendline function to test.
+        app_test (AppTest): The Streamlit app test fixture.
+
+    """
     selectbox = app_test.selectbox(key='trendline')
     selectbox.set_value(value).run()
 

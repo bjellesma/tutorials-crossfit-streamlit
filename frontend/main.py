@@ -1,4 +1,24 @@
+"""Streamlit application for CrossFit data visualization.
+
+This module provides the main Streamlit app for visualizing and analyzing
+CrossFit athlete performance data.
+"""
+
+
 def main():
+    """Run the Streamlit application.
+
+    Sets up the Streamlit page configuration, loads athlete data, and renders
+    the interactive data visualization dashboard. The dashboard includes:
+    - Scatter plots comparing different performance metrics
+    - Statistical analysis and histograms
+    - Data filtering and outlier removal options
+    - Downloadable data exports
+
+    Raises:
+        Exception: Displays error message if the application fails to load.
+
+    """
     import io
     import traceback
     import zipfile

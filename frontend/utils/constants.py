@@ -1,3 +1,9 @@
+"""Constants for the CrossFit application.
+
+This module defines constants including font families and event metadata
+for all CrossFit performance metrics.
+"""
+
 FONT_FAMILY = 'Libertinus Sans, sans-serif'
 
 EVENT_MAPPING = {

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Convert CSV data to DuckDB database for improved performance.
+
 This script converts the athletes.csv file to a DuckDB database file.
 """
 
+import os
+
 import duckdb
 import pandas as pd
-import os
 
 
 def convert_csv_to_duckdb(csv_path: str, db_path: str = 'athletes.duckdb'):
@@ -135,7 +137,15 @@ def verify_duckdb_database(db_path: str):
 
 
 def main():
-    """Main function to convert CSV to DuckDB."""
+    """Convert CSV to DuckDB database.
+
+    Main entry point that converts the athletes.csv file to a DuckDB database,
+    verifies the conversion, and reports statistics.
+
+    Returns:
+        int: Exit code (0 for success, 1 for failure).
+
+    """
     csv_path = 'temp/athletes.csv'
     db_path = 'athletes.duckdb'
 
