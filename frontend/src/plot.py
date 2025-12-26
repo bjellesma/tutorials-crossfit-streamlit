@@ -39,7 +39,7 @@ def load_data() -> pd.DataFrame:
         requests.RequestException: If the API request fails.
 
     """
-    res = requests.get('http://backend:5000/api/athletes')
+    res = requests.get(f'{constants.BACKEND_URL}/api/athletes')
     data = res.json()
     df = pd.DataFrame(data=data['athletes'], columns=data['columns'])
     return df

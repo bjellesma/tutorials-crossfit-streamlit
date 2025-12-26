@@ -4,6 +4,9 @@ This module defines constants including font families and event metadata
 for all CrossFit performance metrics.
 """
 
+import os
+
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:5000')
 FONT_FAMILY = 'Libertinus Sans, sans-serif'
 
 EVENT_MAPPING = {

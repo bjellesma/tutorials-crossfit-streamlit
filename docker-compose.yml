@@ -7,6 +7,7 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+      - backend_venv:/app/.venv
 
   frontend:
     build:
@@ -14,8 +15,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:5000
     volumes:
       - ./frontend:/app
+      - frontend_venv:/app/.venv
 
   dozzle:
     container_name: crossfit-dozzle
@@ -24,3 +28,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - 8888:8080
+
+volumes:
+  backend_venv:
+  frontend_venv:
