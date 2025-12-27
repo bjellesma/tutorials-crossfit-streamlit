@@ -3,11 +3,13 @@ services:
     extends:
       file: docker-common.yml
       service: backend
+    command: ["uv", "run", "fastapi", "run", "routes.py", "--host=0.0.0.0", "--port", "5000"]
 
   frontend:
     extends:
       file: docker-common.yml
       service: frontend
+    command: ["uv", "run","streamlit", "run", "main.py", "--client.toolbarMode", "minimal"]
 
   dozzle:
     extends:
