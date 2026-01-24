@@ -40,9 +40,9 @@ def app_test():
         AppTest: An initialized and run AppTest instance for testing.
 
     """
-    from main import main
+    from pages.dashboard import dashboard_page
 
-    return AppTest.from_function(main, default_timeout=30).run()
+    return AppTest.from_function(dashboard_page, default_timeout=30).run()
 
 
 def test_app(app_test):

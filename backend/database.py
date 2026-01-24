@@ -27,7 +27,7 @@ def get_athletes():
     db_path = 'athletes.duckdb'
 
     with duckdb.connect(db_path) as conn:
-        query = 'SELECT * FROM athletes ORDER BY athlete_id DESC LIMIT 1000;'
+        query = 'SELECT * FROM athletes ORDER BY athlete_id DESC;'
         result = conn.execute(query=query)
         return {'athletes': result.fetchall(), 'columns': [col[0] for col in result.description]}
 
@@ -135,3 +135,34 @@ def create_athlete(
             'athlete_id': new_athlete_id,
             'message': f'Athlete {name} created successfully',
         }
+
+
+def get_athlete(athlete_id: int) -> Optional[dict]:
+    """Get a single athlete by ID from the DuckDB database.
+
+    Retrieves a specific athlete record by athlete_id, returning all columns
+    as a dictionary with column names as keys.
+
+    Args:
+        athlete_id (int): The unique identifier of the athlete to retrieve.
+
+    Returns:
+        Optional[dict]: Dictionary containing athlete data with column names as keys,
+                       or None if athlete not found.
+
+    Raises:
+        duckdb.Error: If there's an error connecting to or querying the database.
+
+    """
+    db_path = 'athletes.duckdb'
+
+    with duckdb.connect(db_path) as conn:
+        result = conn.execute('SELECT * FROM athletes WHERE athlete_id = ? LIMIT 1', [athlete_id])
+        row = result.fetchone()
+
+        if row is None:
+            return None
+
+        # Convert row to dictionary with column names as keys
+        columns = [col[0] for col in result.description]
+        return dict(zip(columns, row))

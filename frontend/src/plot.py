@@ -27,6 +27,7 @@ def calculate_stats(df, column):
     return mean, std
 
 
+@st.cache_data
 def load_data() -> pd.DataFrame:
     """Load athlete data from the backend API.
 
@@ -43,6 +44,38 @@ def load_data() -> pd.DataFrame:
     data = res.json()
     df = pd.DataFrame(data=data['athletes'], columns=data['columns'])
     return df
+
+
+def load_athlete(athlete_id: int) -> dict:
+    """Load a single athlete's data from the backend API.
+
+    Fetches athlete data by athlete_id from the backend service.
+
+    Args:
+        athlete_id (int): The unique identifier of the athlete.
+
+    Returns:
+        dict: Dictionary containing athlete data with all fields.
+
+    Raises:
+        requests.RequestException: If the API request fails.
+        requests.HTTPError: If athlete not found (404) or validation error (422).
+
+    Example:
+        >>> athlete = (
+        ...     load_athlete(
+        ...         2554
+        ...     )
+        ... )
+        >>> print(
+        ...     athlete['name']
+        ... )
+        'John Doe'
+
+    """
+    res = requests.get(f'{constants.BACKEND_URL}/api/athlete/{athlete_id}')
+    res.raise_for_status()  # Raises HTTPError for bad responses
+    return res.json()
 
 
 @st.cache_data
