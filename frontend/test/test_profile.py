@@ -16,12 +16,13 @@ def test_profile_page_renders_success():
     Verifies that the complete profile page workflow functions correctly:
     - fetch_athlete() makes correct API call to backend
     - Returns complete athlete data including all fields
-    - render_profile_page() displays athlete information
+    - render_profile() displays athlete information
     - Navigation buttons (previous, dashboard, next) are rendered
     - Uses helpers.format_value() for consistent formatting
     - Handles both required and optional fields properly
     """
-    from pages.profile import fetch_athlete, render_profile_page
+    from pages.profile import render_profile
+    from src.plot import load_athlete
 
     mock_athlete_data = {
         'athlete_id': 2554,
@@ -54,7 +55,7 @@ def test_profile_page_renders_success():
         mock_response.raise_for_status = Mock()
         mock_get.return_value = mock_response
 
-        result = fetch_athlete(2554)
+        result = load_athlete(2554)
 
         # Verify correct endpoint was called
         mock_get.assert_called_once()
@@ -65,18 +66,19 @@ def test_profile_page_renders_success():
         assert result['age'] == 32
         assert result['grace'] == 195
 
-    # Test render_profile_page function
-    with patch('pages.profile.fetch_athlete', return_value=mock_athlete_data):
+    # Test render_profile function
+    with patch('src.plot.load_athlete', return_value=mock_athlete_data):
         with patch('streamlit.query_params') as mock_params:
             mock_params.get.return_value = '2554'
 
             # Should render without errors
-            render_profile_page()
+            render_profile()
 
             # Verify query params were accessed
             mock_params.get.assert_called()
 
 
+@pytest.mark.single
 def test_profile_page_fail():
     """Test profile page handles errors and invalid input gracefully (negative test).
 
@@ -89,14 +91,15 @@ def test_profile_page_fail():
     - Error messages are displayed to users
     - fetch_athlete is not called when athlete_id is invalid
     """
-    from pages.profile import fetch_athlete, render_profile_page
+    from pages.profile import render_profile
+    from src.plot import load_athlete
 
     # Test 1: Missing athlete_id parameter
     with patch('streamlit.query_params') as mock_params:
         mock_params.get.return_value = None
-        with patch('pages.profile.fetch_athlete') as mock_fetch:
+        with patch('src.plot.load_athlete') as mock_fetch:
             with patch('streamlit.error') as mock_error:
-                render_profile_page()
+                render_profile()
 
                 # Should show error and not call fetch
                 mock_error.assert_called()
@@ -105,9 +108,9 @@ def test_profile_page_fail():
     # Test 2: Invalid athlete_id format (non-numeric)
     with patch('streamlit.query_params') as mock_params:
         mock_params.get.return_value = 'invalid_id'
-        with patch('pages.profile.fetch_athlete') as mock_fetch:
+        with patch('src.plot.load_athlete') as mock_fetch:
             with patch('streamlit.error') as mock_error:
-                render_profile_page()
+                render_profile()
 
                 # Should show error and not call fetch
                 mock_error.assert_called()
@@ -121,7 +124,7 @@ def test_profile_page_fail():
         mock_get.return_value = mock_response
 
         with pytest.raises(requests.HTTPError) as exc_info:
-            fetch_athlete(99999)
+            load_athlete(99999)
 
         assert exc_info.value.response.status_code == 404
 
@@ -133,7 +136,7 @@ def test_profile_page_fail():
         mock_get.return_value = mock_response
 
         with pytest.raises(requests.HTTPError) as exc_info:
-            fetch_athlete(2554)
+            load_athlete(2554)
 
         assert exc_info.value.response.status_code == 500
 
@@ -162,9 +165,9 @@ def test_profile_page_fail():
         'pullups': None,
     }
 
-    with patch('pages.profile.fetch_athlete', return_value=mock_athlete_data_minimal):
+    with patch('src.plot.load_athlete', return_value=mock_athlete_data_minimal):
         with patch('streamlit.query_params') as mock_params:
             mock_params.get.return_value = '100'
 
             # Should handle missing fields without crashing
-            render_profile_page()
+            render_profile()

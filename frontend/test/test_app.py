@@ -40,9 +40,9 @@ def app_test():
         AppTest: An initialized and run AppTest instance for testing.
 
     """
-    from pages.dashboard import dashboard_page
+    from pages.dashboard import render_dashboard
 
-    return AppTest.from_function(dashboard_page, default_timeout=30).run()
+    return AppTest.from_function(render_dashboard, default_timeout=30).run()
 
 
 def test_app(app_test):
@@ -87,7 +87,6 @@ def test_y_axis(value, app_test):
     assert not errors, f'Value {value} triggered errors {",".join(errors)}'
 
 
-@pytest.mark.single
 @pytest.mark.parametrize('value', trendline_functions)
 def test_trendline(value, app_test):
     """Test trendline selection with different functions.

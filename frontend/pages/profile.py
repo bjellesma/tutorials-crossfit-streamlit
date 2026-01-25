@@ -5,7 +5,7 @@ including personal information and all workout metrics.
 """
 
 
-def main():
+def render_profile():
     """Display athlete profile page.
 
     Provides interface to search for and view detailed athlete information,
@@ -49,7 +49,12 @@ def main():
         try:
             athlete_id_param = int(athlete_id_param)
         except ValueError:
-            athlete_id_param = None
+            st.error('❌ Invalid athlete_id parameter in URL. Must be an integer.')
+            return
+
+    if athlete_id_param not in athlete_ids:
+        st.error(f'❌ Athlete ID {athlete_id_param} not found in dataset.')
+        return
 
     # Initialize or update session state for current index
     if 'athlete_index' not in st.session_state:
@@ -190,4 +195,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    render_profile()

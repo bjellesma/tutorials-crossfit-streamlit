@@ -1,11 +1,4 @@
-"""Dashboard page for CrossFit data visualization.
-
-This module provides the main dashboard for visualizing and analyzing
-CrossFit athlete performance data.
-"""
-
-
-def main():
+def render_dashboard():
     """Run the Streamlit application.
 
     Sets up the Streamlit page configuration, loads athlete data, and renders
@@ -368,4 +361,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    render_dashboard()

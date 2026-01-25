@@ -13,11 +13,11 @@ backend:
 
 
 test:
-	uv run $(if $(PYTHON),--python $(PYTHON),) pytest -m single -v --cov=.
+	cd frontend && uv run $(if $(PYTHON),--python $(PYTHON),) pytest -m single -v --cov=.
 
 
 fulltest:
-	uv run $(if $(PYTHON),--python $(PYTHON),) pytest -v --cov=.
+	cd frontend && uv run $(if $(PYTHON),--python $(PYTHON),) pytest -v --cov=.
 
 
 install:
