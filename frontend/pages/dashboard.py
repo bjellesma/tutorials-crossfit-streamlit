@@ -39,7 +39,8 @@ def render_dashboard():
         css_vars = helpers.generate_css()
         st.markdown(f'<style>{css_vars}{css_content}</style>', unsafe_allow_html=True)
         st.set_page_config(page_title='Crossfit Data')
-        df = load_data()
+        with helpers.timer('Initial data load'):
+            df = load_data()
 
         @st.fragment
         def download_data(df: pd.DataFrame, x_axis, y_axis, fig):
@@ -64,30 +65,31 @@ def render_dashboard():
                 )
 
             """
-            cols_to_include = ['name', 'affiliate', 'region', 'team', 'gender', x_axis, y_axis]
-            filtered_df = df[cols_to_include].copy()
+            with helpers.timer('Preparing download data'):
+                cols_to_include = ['name', 'affiliate', 'region', 'team', 'gender', x_axis, y_axis]
+                filtered_df = df[cols_to_include].copy()
 
-            # captilize
-            filtered_df.columns = [col.capitalize() for col in filtered_df.columns]
+                # captilize
+                filtered_df.columns = [col.capitalize() for col in filtered_df.columns]
 
-            # convert to int
-            for col in filtered_df.columns:
-                if filtered_df[col].dtype == 'float64':
-                    filtered_df[col] = filtered_df[col].astype(int)
+                # convert to int
+                for col in filtered_df.columns:
+                    if filtered_df[col].dtype == 'float64':
+                        filtered_df[col] = filtered_df[col].astype(int)
 
-            zip_buffer = io.BytesIO()
+                zip_buffer = io.BytesIO()
 
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            # image
-            img_buffer = io.BytesIO()
-            fig.write_image(img_buffer, format='png', width=1000, height=800)
+                # image
+                img_buffer = io.BytesIO()
+                fig.write_image(img_buffer, format='png', width=1000, height=800)
 
-            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                csv = filtered_df.to_csv(index=False)
-                zip_file.writestr('crossfit_data.csv', csv)
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                    csv = filtered_df.to_csv(index=False)
+                    zip_file.writestr('crossfit_data.csv', csv)
 
-                metadata = f"""
+                    metadata = f"""
     Generated at: {timestamp}
     X Axis: {x_axis}
     Y Axis: {y_axis}
@@ -96,8 +98,8 @@ def render_dashboard():
     Columns: {', '.join(filtered_df.columns)}
     """
 
-                zip_file.writestr('metadata.txt', metadata)
-                zip_file.writestr('scatter.png', img_buffer.getvalue())
+                    zip_file.writestr('metadata.txt', metadata)
+                    zip_file.writestr('scatter.png', img_buffer.getvalue())
 
             st.download_button(
                 label='Download Data',

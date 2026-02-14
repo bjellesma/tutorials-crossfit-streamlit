@@ -4,8 +4,12 @@ This module provides utility functions for retrieving event metadata,
 formatting values, and managing URL parameters.
 """
 
+import time
+from contextlib import contextmanager
+
 import streamlit as st
 from utils import constants
+from utils.logger import logger
 
 
 def _get_event(axis_name: str):
@@ -97,3 +101,24 @@ def get_url_param(key, default=None):
 
     """
     return st.query_params.get(key, default)
+
+
+@contextmanager
+def timer(name: str = 'Operation'):
+    """Context manager for timing code execution.
+
+    Measures elapsed time of code block and logs results.
+    Useful for identifying performance bottlenecks.
+
+
+    Args:
+        name (str): Descriptive name for the operation being timed. Defaults to "Operation".adfafd
+
+
+    """
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        elapsed = time.perf_counter() - start_time
+        logger.debug(f'{name} took {elapsed:.4f} seconds ({elapsed * 1000:.2f} ms)')

@@ -8,6 +8,7 @@ import os
 
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://127.0.0.1:5000')
 FONT_FAMILY = 'Libertinus Sans, sans-serif'
+DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
 EVENT_MAPPING = {
     'athlete_id': {

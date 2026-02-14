@@ -4,6 +4,9 @@ This module provides navigation between dashboard and athlete profile pages.
 """
 
 import streamlit as st
+import utils.logger as logger
+
+logger = logger.get_logger(__name__)
 
 
 def main():
@@ -14,6 +17,7 @@ def main():
 
     """
     # Define pages
+    logger.debug('Starting Streamlit application')
     dashboard = st.Page('pages/dashboard.py', title='Dashboard', icon='📊', default=True)
     profile = st.Page('pages/profile.py', title='Athlete Profile', icon='👤')
 

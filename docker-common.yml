@@ -17,6 +17,7 @@ services:
       - "8501:8501"
     environment:
       - BACKEND_URL=http://backend:5000
+      - DEBUG=False
     volumes:
       - ./frontend:/app
       - frontend_venv:/app/.venv
