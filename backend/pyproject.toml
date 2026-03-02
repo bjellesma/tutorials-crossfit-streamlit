@@ -5,6 +5,9 @@ requires-python = ">=3.10"
 dependencies = [
     "fastapi[standard]",
     "duckdb",
+    "joblib>=1.5.3",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
 ]
 
 [dependency-groups]

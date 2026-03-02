@@ -23,6 +23,7 @@ def render_profile():
 
     import requests
     import streamlit as st
+    from src import api
     from src.plot import load_athlete, load_data
     from utils import helpers
 
@@ -52,9 +53,9 @@ def render_profile():
             st.error('❌ Invalid athlete_id parameter in URL. Must be an integer.')
             return
 
-    if athlete_id_param not in athlete_ids:
-        st.error(f'❌ Athlete ID {athlete_id_param} not found in dataset.')
-        return
+        if athlete_id_param not in athlete_ids:
+            st.error(f'❌ Athlete ID {athlete_id_param} not found in dataset.')
+            return
 
     # Initialize or update session state for current index
     if 'athlete_index' not in st.session_state:
@@ -175,6 +176,150 @@ def render_profile():
                     else:
                         display_name = helpers.get_event_info(field, 'display_name')
                         st.info(f'{display_name}: No data')
+
+        with st.form('prediction_form'):
+            DEFAULT_VALUES = {
+                'age': 25,
+                'weight': 170.0,
+                'pullups': 20,
+                'backsq': 225,
+                'deadlift': 315,
+                'snatch': 135,
+                'candj': 185,
+            }
+            col1, col2 = st.columns(2)
+
+            with col1:
+                form_age = st.number_input(
+                    'Age',
+                    min_value=1,
+                    max_value=120,
+                    value=int(athlete.get('age') or DEFAULT_VALUES['age']),
+                    help='Athlete age in years',
+                )
+                form_gender = st.selectbox(
+                    'Gender',
+                    options=['male', 'female'],
+                    index=0
+                    if not athlete.get('gender') or athlete.get('gender', '').lower() == 'male'
+                    else 1,
+                    help='Athlete gender',
+                )
+
+                form_weight = st.number_input(
+                    'Body Weight (lbs)',
+                    min_value=1.0,
+                    max_value=500.0,
+                    value=float(athlete.get('weight') or DEFAULT_VALUES['weight']),
+                    step=0.5,
+                    help='Athlete body weight in pounds',
+                )
+
+                form_pullups = st.number_input(
+                    'Pull-ups',
+                    min_value=0,
+                    max_value=200,
+                    value=int(athlete.get('pullups') or DEFAULT_VALUES['pullups']),
+                    help='Number of pull-ups',
+                )
+
+            with col2:
+                form_backsq = st.number_input(
+                    'Back Squat (lbs)',
+                    min_value=0,
+                    max_value=1000,
+                    value=int(athlete.get('backsq') or DEFAULT_VALUES['backsq']),
+                    help='Back squat weight in pounds',
+                )
+
+                form_deadlift = st.number_input(
+                    'Deadlift (lbs)',
+                    min_value=0,
+                    max_value=1500,
+                    value=int(athlete.get('deadlift') or DEFAULT_VALUES['deadlift']),
+                    help='Deadlift weight in pounds',
+                )
+
+                form_snatch = st.number_input(
+                    'Snatch (lbs)',
+                    min_value=0,
+                    max_value=800,
+                    value=int(athlete.get('snatch') or DEFAULT_VALUES['snatch']),
+                    help='Snatch weight in pounds',
+                )
+
+                form_candj = st.number_input(
+                    'Clean & Jerk (lbs)',
+                    min_value=0,
+                    max_value=800,
+                    value=int(athlete.get('candj') or DEFAULT_VALUES['candj']),
+                    help='Clean and jerk weight in pounds',
+                )
+
+            submit_button = st.form_submit_button(
+                '🔮 Get Prediction', width='stretch', shortcut='Enter'
+            )
+            if submit_button:
+                try:
+                    with st.spinner('Calculating prediction...'):
+                        predicted_time = api.predict_run5k(
+                            age=form_age,
+                            gender=form_gender,
+                            backsq=form_backsq,
+                            deadlift=form_deadlift,
+                            snatch=form_snatch,
+                            candj=form_candj,
+                            pullups=form_pullups,
+                            weight=form_weight,
+                        )
+                    prediction = helpers.format_value(predicted_time, 'run5k')
+                    st.success(f'**Predicted 5K Time:** {prediction}')
+
+                    # If athlete has actual 5K time, show comparison
+                    actual_run5k = athlete.get('run5k')
+                    if actual_run5k:
+                        formatted_actual = helpers.format_value(actual_run5k, 'run5k')
+                        difference = actual_run5k - predicted_time
+
+                        col_actual, col_diff = st.columns(2)
+
+                        with col_actual:
+                            st.metric('Actual Time', formatted_actual)
+
+                        with col_diff:
+                            # Positive difference means actual is slower (worse)
+                            formatted_diff = helpers.format_value(abs(difference), 'run5k')
+                            if difference > 0:
+                                st.metric(
+                                    'Difference',
+                                    formatted_diff,
+                                    delta='Slower than predicted',
+                                    delta_color='inverse',
+                                )
+                            elif difference < 0:
+                                st.metric(
+                                    'Difference',
+                                    formatted_diff,
+                                    delta='Faster than predicted',
+                                    delta_color='normal',
+                                )
+                            else:
+                                st.metric('Difference', formatted_diff)
+                except requests.HTTPError as e:
+                    # check for a response object and status code to provide more specific error messages
+                    if hasattr(e, 'response') and e.response is not None:
+                        if e.response.status_code == 422:
+                            st.error(helpers.generate_error_message(422, e))
+                        elif e.response.status_code == 500:
+                            st.error(helpers.generate_error_message(500, e))
+                        else:
+                            st.error(helpers.generate_error_message('prediction', e))
+                    else:
+                        st.error(helpers.generate_error_message('prediction', e))
+                except requests.ConnectionError as e:
+                    st.error(helpers.generate_error_message('connection', e))
+                except Exception as e:
+                    st.error(helpers.generate_error_message('unexpected', e))
 
     except requests.HTTPError as e:
         if hasattr(e, 'response') and e.response is not None:

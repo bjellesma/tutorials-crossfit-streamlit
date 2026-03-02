@@ -89,6 +89,24 @@ def generate_css():
     """
 
 
+def generate_error_message(code, e):
+    """Generate user-friendly error messages based on error codes and exceptions.
+
+    Args:
+        code: The error code to generate a message for.
+        e: The exception object containing error details.
+
+    """
+    error_codes = {
+        422: 'Invalid input parameters. Please check your values and try again.',
+        500: 'Server error while generating prediction. Please try again later.',
+        'connection': 'Unable to connect to the backend server. Please ensure the backend is running.',
+        'prediction': f'Error generating prediction: {str(e)}',
+        'unexpected': f'An unexpected error occurred: {str(e)}',
+    }
+    return error_codes.get(code, f'An unexpected error occurred: {str(e)}')
+
+
 def get_url_param(key, default=None):
     """Get a URL query parameter value.
 

@@ -8,6 +8,7 @@ import traceback
 import database
 from fastapi import FastAPI, HTTPException
 from models import Athlete, AthleteResponse
+from predict import predict_run5k
 
 app = FastAPI()
 
@@ -96,6 +97,50 @@ def get_athlete_by_id(athlete_id: int):
         return athlete
     except HTTPException:
         raise
+    except Exception as ex:
+        traceback.print_exc()
+        raise HTTPException(500, detail=str(ex))
+
+
+@app.get('/api/predict/run5k')
+def get_run5k_prediction(
+    age: int,
+    gender: str,
+    backsq: int,
+    deadlift: int,
+    snatch: int,
+    candj: int,
+    pullups: int,
+    weight: float,
+):
+    """Predict 5K run time based on athlete metrics using a pre-trained model.
+
+    Args:
+        age (int): Athlete's age.
+        gender (str): Athlete's gender ('male' or 'female).
+        backsq (int): Back squat weight.
+        deadlift (int): Deadlift weight.
+        snatch (int): Snatch weight.
+        candj (int): Clean and jerk weight.
+        pullups (int): Number of pull-ups.
+        weight (int): Athlete's body weight.
+
+    Returns:
+        dict: Predicted 5K run time in seconds.
+
+    """
+    try:
+        predicted_time = predict_run5k(
+            age=age,
+            gender=gender,
+            backsq=backsq,
+            deadlift=deadlift,
+            snatch=snatch,
+            candj=candj,
+            pullups=pullups,
+            weight=weight,
+        )
+        return {'predicted_run5k_time': predicted_time}
     except Exception as ex:
         traceback.print_exc()
         raise HTTPException(500, detail=str(ex))

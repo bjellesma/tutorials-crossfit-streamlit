@@ -62,21 +62,10 @@ def load_athlete(athlete_id: int) -> dict:
         requests.RequestException: If the API request fails.
         requests.HTTPError: If athlete not found (404) or validation error (422).
 
-    Example:
-        >>> athlete = (
-        ...     load_athlete(
-        ...         2554
-        ...     )
-        ... )
-        >>> print(
-        ...     athlete['name']
-        ... )
-        'John Doe'
-
     """
     with helpers.timer(f'Loading athlete {athlete_id}'):
         res = requests.get(f'{constants.BACKEND_URL}/api/athlete/{athlete_id}')
-        res.raise_for_status()  # Raises HTTPError for bad responses
+        res.raise_for_status()
         athlete_data = res.json()
     return athlete_data
 
