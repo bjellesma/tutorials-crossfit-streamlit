@@ -6,9 +6,10 @@ from sklearn.model_selection import train_test_split
 # Pull training data from DuckDB
 conn = duckdb.connect('athletes.duckdb')
 df = conn.execute("""
-    SELECT age, backsq, gender, deadlift, snatch, candj, pullups, weight, run5k
+    SELECT age, backsq, gender, deadlift, snatch, candj, pullups, weight, height, run400, fran, helen, grace, run5k
     FROM athletes
-    WHERE run5k IS NOT NULL
+    WHERE run400 IS NOT NULL
+      AND run5k IS NOT NULL
       AND backsq IS NOT NULL
       AND deadlift IS NOT NULL
 """).df()
@@ -39,15 +40,42 @@ df = df[
     & (df['snatch'] <= 350)
     & (df['candj'] >= 75)
     & (df['candj'] <= 450)
-    & (df['pullups'] >= 1)
-    & (df['pullups'] <= 100)
+    & (df['pullups'] >= 10)
+    & (df['pullups'] <= 50)
     & (df['weight'] >= 100)
     & (df['weight'] <= 300)
+    & (df['height'] >= 60)
+    & (df['height'] <= 80)
+    & (df['run400'] >= 50)
+    & (df['run400'] <= 200)
+    & (df['fran'] >= 200)
+    & (df['fran'] <= 600)
+    & (df['helen'] >= 200)
+    & (df['helen'] <= 720)
+    & (df['grace'] >= 200)
+    & (df['grace'] <= 600)
 ]
 print(f'Training on {len(df)} athletes after filtering outliers')
 
 # Prep features and target
-X = df[['age', 'backsq', 'gender', 'deadlift', 'snatch', 'candj', 'pullups', 'weight']]
+# Prep features and target
+X = df[
+    [
+        'age',
+        'backsq',
+        'gender',
+        'deadlift',
+        'snatch',
+        'candj',
+        'pullups',
+        'weight',
+        'height',
+        'run400',
+        'fran',
+        'helen',
+        'grace',
+    ]
+]
 y = df['run5k']
 
 # Train
@@ -57,7 +85,14 @@ model = GradientBoostingRegressor(
 )
 model.fit(X_train, y_train)
 
-# todo add feature importance and partial dependence plots to understand model behavior
+# Show feature importances
+print('\n=== Feature Importances ===')
+feature_names = X.columns
+importances = model.feature_importances_
+# reverse sort by importance (highest first)
+sorted_idx = importances.argsort()[::-1]
+for idx in sorted_idx:
+    print(f'  {feature_names[idx]:10s}: {importances[idx]:.4f} ({importances[idx] * 100:.1f}%)')
 
 # Evaluate
 train_score = model.score(X_train, y_train)

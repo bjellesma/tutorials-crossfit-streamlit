@@ -112,6 +112,11 @@ def get_run5k_prediction(
     candj: int,
     pullups: int,
     weight: float,
+    height: float,
+    run400: float | int,
+    fran: float | int,
+    helen: float | int,
+    grace: float | int,
 ):
     """Predict 5K run time based on athlete metrics using a pre-trained model.
 
@@ -124,6 +129,11 @@ def get_run5k_prediction(
         candj (int): Clean and jerk weight.
         pullups (int): Number of pull-ups.
         weight (int): Athlete's body weight.
+        height (float|int): Athlete's height in inches.
+        run400 (float|int): 400m run time in seconds.
+        fran (float|int): Fran workout time in seconds.
+        helen (float|int): Helen workout time in seconds.
+        grace (float|int): Grace workout time in seconds.
 
     Returns:
         dict: Predicted 5K run time in seconds.
@@ -139,6 +149,11 @@ def get_run5k_prediction(
             candj=candj,
             pullups=pullups,
             weight=weight,
+            height=height,
+            run400=run400,
+            fran=fran,
+            helen=helen,
+            grace=grace,
         )
         return {'predicted_run5k_time': predicted_time}
     except Exception as ex:

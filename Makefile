@@ -26,3 +26,6 @@ install:
 
 lint:
 	uv run $(if $(PYTHON),--python $(PYTHON),) ruff check .
+
+train:
+	cd backend && uv run $(if $(PYTHON),--python $(PYTHON),) python trainer.py
