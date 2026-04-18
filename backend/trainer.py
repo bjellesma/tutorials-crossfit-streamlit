@@ -1,7 +1,7 @@
 import duckdb
 import joblib
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, train_test_split
 
 # Pull training data from DuckDB
 conn = duckdb.connect('athletes.duckdb')
@@ -58,7 +58,6 @@ df = df[
 print(f'Training on {len(df)} athletes after filtering outliers')
 
 # Prep features and target
-# Prep features and target
 X = df[
     [
         'age',
@@ -78,12 +77,48 @@ X = df[
 ]
 y = df['run5k']
 
-# Train
+# choose several combinations of hyperparameters to test
+param_grid = {
+    'learning_rate': [0.05, 0.1, 0.2, 0.5],
+    'n_estimators': [10, 50, 100, 200],
+    'max_depth': [3, 4, 5, 6, 7, 8],
+}
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-model = GradientBoostingRegressor(
-    n_estimators=10, learning_rate=0.4, verbose=1, max_depth=5, random_state=42
+
+print('\n=== Grid Search for Best Hyperparameters ===')
+print(
+    f'Testing {len(param_grid["learning_rate"]) * len(param_grid["n_estimators"]) * len(param_grid["max_depth"])} combinations...\n'
 )
-model.fit(X_train, y_train)
+# Train
+base_model = GradientBoostingRegressor(random_state=42)
+# Grid search with 5-fold cross-validation
+grid_search = GridSearchCV(
+    estimator=base_model, param_grid=param_grid, scoring='r2', cv=5, n_jobs=-1, verbose=1
+)
+
+# Fit grid search
+grid_search.fit(X_train, y_train)
+
+# Show results
+print('\n=== Grid Search Results ===')
+print(f'Best parameters: {grid_search.best_params_}')
+print(f'Best cross-validation R² score: {grid_search.best_score_:.4f}')
+
+# Show R² scores for all combinations
+print('\n=== All Parameter Combinations (sorted by R² score) ===')
+results = grid_search.cv_results_
+sorted_indices = results['mean_test_score'].argsort()[::-1]
+for i, idx in enumerate(sorted_indices, 1):
+    mean_score = results['mean_test_score'][idx]
+    std_score = results['std_test_score'][idx]
+    params = results['params'][idx]
+    print(
+        f'{i:2d}. R²={mean_score:.4f} (±{std_score:.4f}) | lr={params["learning_rate"]}, n={params["n_estimators"]:3d}, depth={params["max_depth"]}'
+    )
+
+# Use the best model
+model = grid_search.best_estimator_
 
 # Show feature importances
 print('\n=== Feature Importances ===')
@@ -99,5 +134,17 @@ train_score = model.score(X_train, y_train)
 test_score = model.score(X_test, y_test)
 print(f'\nTraining R² score: {train_score:.4f}')
 print(f'Test R² score: {test_score:.4f}')
+
+# Compare with previous model settings
+print('\n=== Comparison with Previous Model ===')
+previous_model = GradientBoostingRegressor(
+    n_estimators=10, learning_rate=0.5, max_depth=5, random_state=42, verbose=1
+)
+previous_model.fit(X_train, y_train)
+previous_train_score = previous_model.score(X_train, y_train)
+previous_test_score = previous_model.score(X_test, y_test)
+print(f'Previous model: Train R²={previous_train_score:.4f}, Test R²={previous_test_score:.4f}')
+print(f'Optimized model: Train R²={train_score:.4f}, Test R²={test_score:.4f}')
+print(f'Improvement: {((test_score - previous_test_score) / abs(previous_test_score) * 100):.1f}%')
 
 joblib.dump(model, 'run5k_predictor.model')
