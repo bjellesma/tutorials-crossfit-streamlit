@@ -1,61 +1,107 @@
 import duckdb
 import joblib
 from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor
+from sklearn.experimental import enable_iterative_imputer  # noqa: F401
+from sklearn.impute import IterativeImputer
 from sklearn.model_selection import GridSearchCV, train_test_split
+
+
+def _remove_outliers(df):
+    """Remove outliers with realistic ranges for CrossFit athletes.
+
+    run5k: 15-40 minutes (900-2400 seconds)
+    backsq: 100-600 lbs
+    deadlift: 150-700 lbs
+    snatch: 50-350 lbs
+    candj: 75-450 lbs
+    pullups: 1-100 reps
+    weight: 100-300 lbs
+
+    Args:
+        df (pd.DataFrame): DataFrame containing athlete data
+
+    Returns:
+        pd.DataFrame: DataFrame with outliers removed
+
+    """
+    return df[
+        (df['age'] >= 18)
+        & (df['age'] <= 65)
+        & (df['run5k'] >= 900)
+        & (df['run5k'] <= 2400)
+        & (df['backsq'] >= 100)
+        & (df['backsq'] <= 600)
+        & (df['deadlift'] >= 150)
+        & (df['deadlift'] <= 700)
+        & (df['snatch'] >= 50)
+        & (df['snatch'] <= 350)
+        & (df['candj'] >= 75)
+        & (df['candj'] <= 450)
+        & (df['pullups'] >= 10)
+        & (df['pullups'] <= 50)
+        & (df['weight'] >= 100)
+        & (df['weight'] <= 300)
+        & (df['height'] >= 60)
+        & (df['height'] <= 80)
+        & (df['run400'] >= 50)
+        & (df['run400'] <= 200)
+        & (df['fran'] >= 200)
+        & (df['fran'] <= 600)
+        & (df['helen'] >= 200)
+        & (df['helen'] <= 720)
+        & (df['grace'] >= 200)
+        & (df['grace'] <= 600)
+    ]
+
+
+def _impute_missing_values(df, n_neighbors=10, weights='distance'):
+    """Impute missing values in numeric columns using KNN.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing athlete data
+        n_neighbors (int): Number of neighboring rows to use for imputation
+        weights (str): 'uniform' weights all neighbors equally; 'distance' gives closer neighbors more influence
+
+    Returns:
+        pd.DataFrame: DataFrame with missing values imputed
+
+    """
+    numeric_cols = [
+        'age',
+        'backsq',
+        'deadlift',
+        'snatch',
+        'candj',
+        'pullups',
+        'weight',
+        'height',
+        'run400',
+        'fran',
+        'helen',
+        'grace',
+        'run5k',
+    ]
+    imputer = IterativeImputer(max_iter=50, random_state=42, tol=0.001)
+    df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
+    return df
+
 
 # Pull training data from DuckDB
 conn = duckdb.connect('athletes.duckdb')
 df = conn.execute("""
     SELECT age, backsq, gender, deadlift, snatch, candj, pullups, weight, height, run400, fran, helen, grace, run5k
-    FROM athletes
-    WHERE run400 IS NOT NULL
-      AND run5k IS NOT NULL
-      AND backsq IS NOT NULL
-      AND deadlift IS NOT NULL
+    FROM athletes LIMIT 30000
 """).df()
-df = df.dropna()
+print(f'Initial dataset contains {len(df)} athletes')
 
 # Encode gender as numeric (Male=1, Female=0, others=0)
 df['gender'] = df['gender'].str.lower().map({'male': 1, 'female': 0}).fillna(0)
+print(f'Before impute: {df.head()}')
+df = _impute_missing_values(df, n_neighbors=10, weights='distance')
+print(f'After impute: {df.head()}')
 
-print(f'Loaded {len(df)} athletes for training')
-# Remove outliers with realistic ranges for CrossFit athletes
-# run5k: 15-40 minutes (900-2400 seconds)
-# backsq: 100-600 lbs
-# deadlift: 150-700 lbs
-# snatch: 50-350 lbs
-# candj: 75-450 lbs
-# pullups: 1-100 reps
-# weight: 100-300 lbs
-df = df[
-    (df['age'] >= 18)
-    & (df['age'] <= 65)
-    & (df['run5k'] >= 900)
-    & (df['run5k'] <= 2400)
-    & (df['backsq'] >= 100)
-    & (df['backsq'] <= 600)
-    & (df['deadlift'] >= 150)
-    & (df['deadlift'] <= 700)
-    & (df['snatch'] >= 50)
-    & (df['snatch'] <= 350)
-    & (df['candj'] >= 75)
-    & (df['candj'] <= 450)
-    & (df['pullups'] >= 10)
-    & (df['pullups'] <= 50)
-    & (df['weight'] >= 100)
-    & (df['weight'] <= 300)
-    & (df['height'] >= 60)
-    & (df['height'] <= 80)
-    & (df['run400'] >= 50)
-    & (df['run400'] <= 200)
-    & (df['fran'] >= 200)
-    & (df['fran'] <= 600)
-    & (df['helen'] >= 200)
-    & (df['helen'] <= 720)
-    & (df['grace'] >= 200)
-    & (df['grace'] <= 600)
-]
-print(f'Training on {len(df)} athletes after filtering outliers')
+df = _remove_outliers(df)
+print(f'Cleaned dataset contains {len(df)} athletes')
 
 # Prep features and target
 X = df[
